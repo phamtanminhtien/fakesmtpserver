@@ -4,9 +4,13 @@ A monorepo containing a fake SMTP server with a React frontend and NestJS backen
 
 ## Screenshot
 
-![Fake SMTP Server UI](screenshot.png)
+![Fake SMTP Server UI - Main Interface](screenshot-1.png)
 
-_Web interface showing received emails with modern React frontend_
+_Main interface showing the email list and management features_
+
+![Fake SMTP Server UI - Email Details](screenshot-2.png)
+
+_Detailed view of received emails with content inspection_
 
 ## Docker Setup
 
