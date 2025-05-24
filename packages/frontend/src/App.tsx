@@ -1,4 +1,5 @@
-import React from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,24 +7,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
-import { Separator } from "@radix-ui/react-separator";
-import {
-  Mail,
-  Server,
-  Users,
-  Trash2,
-  RefreshCw,
-  Pause,
-  Play,
-  AlertCircle,
-  Copy,
-  X,
-} from "lucide-react";
 import { useEmails } from "@/hooks/useEmails";
 import { useSMTPInfo } from "@/hooks/useSMTPInfo";
+import { Separator } from "@radix-ui/react-separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
+import {
+  AlertCircle,
+  Copy,
+  Mail,
+  Pause,
+  Play,
+  RefreshCw,
+  Server,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
 
 function App() {
   const {
@@ -473,7 +472,7 @@ function App() {
                     <h3 className="text-lg font-medium mb-4">
                       Status & Configuration
                     </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
                         <div>
                           <span className="text-sm font-medium">
@@ -507,6 +506,23 @@ function App() {
                             >
                               {isPolling ? "Active" : "Paused"}
                             </Badge>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <div>
+                          <span className="text-sm font-medium">
+                            Refresh Interval
+                          </span>
+                          <div className="mt-1">
+                            <span className="text-sm text-muted-foreground">
+                              {parseInt(
+                                import.meta.env.VITE_REFRESH_INTERVAL || "2000",
+                                10
+                              ) / 1000}
+                              s
+                            </span>
                           </div>
                         </div>
                       </div>

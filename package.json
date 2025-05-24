@@ -1,13 +1,19 @@
 {
   "name": "@fake-smtp-server/root",
+  "version": "1.0.0",
+  "description": "A monorepo containing a fake SMTP server with a React frontend and NestJS backend for testing email functionality",
+  "license": "MIT",
   "private": false,
   "workspaces": [
     "packages/*"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  },
   "scripts": {
     "dev:backend": "lerna run start:dev --scope=@fake-smtp-server/backend",
-    "dev:frontend": "lerna run dev --scope=@fake-smtp-server/frontend"
+    "dev:frontend": "lerna run dev --scope=@fake-smtp-server/frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\""
   },
   "devDependencies": {
     "lerna": "^8.2.2"

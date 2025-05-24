@@ -1,7 +1,9 @@
 {
   "name": "@fake-smtp-server/frontend",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
+  "description": "React frontend for the fake SMTP server application",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
