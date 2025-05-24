@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { SafeEmailRenderer } from "@/components/SafeEmailRenderer";
 import { useEmails } from "@/hooks/useEmails";
 import { useSMTPInfo } from "@/hooks/useSMTPInfo";
 import { Separator } from "@radix-ui/react-separator";
@@ -104,6 +105,7 @@ function App() {
               <Button
                 onClick={togglePolling}
                 variant={isPolling ? "destructive" : "default"}
+                className={!isPolling ? "text-red-500" : "text-green-500"}
                 size="sm"
               >
                 {isPolling ? (
@@ -333,11 +335,8 @@ function App() {
                               </div>
                               <div className="p-4 bg-white min-h-[200px] max-h-[400px] overflow-auto">
                                 {selectedEmail.html ? (
-                                  <div
-                                    className="text-sm"
-                                    dangerouslySetInnerHTML={{
-                                      __html: selectedEmail.html,
-                                    }}
+                                  <SafeEmailRenderer
+                                    htmlContent={selectedEmail.html}
                                   />
                                 ) : selectedEmail.text ? (
                                   <pre className="text-sm whitespace-pre-wrap font-sans">
