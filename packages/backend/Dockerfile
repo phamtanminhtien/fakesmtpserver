@@ -47,7 +47,7 @@ RUN adduser -S nestjs -u 1001
 USER nestjs
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3000 2525
 
 # Start the application
 CMD ["node", "dist/main.js"] 

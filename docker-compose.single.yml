@@ -2,11 +2,7 @@ version: "3.8"
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        REFRESH_INTERVAL: 3000
+    image: phamtanminhtien/fake-smtp-server:latest
     container_name: fake-smtp-server
     restart: unless-stopped
     ports:
