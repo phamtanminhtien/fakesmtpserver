@@ -1,6 +1,6 @@
 {
   "name": "@fake-smtp-server/root",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A monorepo containing a fake SMTP server with a React frontend and NestJS backend for testing email functionality",
   "license": "MIT",
   "private": false,
