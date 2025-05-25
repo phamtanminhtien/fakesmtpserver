@@ -1,6 +1,39 @@
 # Fake SMTP Server with UI
 
-A monorepo containing a fake SMTP server with a React frontend and NestJS backend.
+A monorepo containing a fake SMTP server with a React frontend and NestJS backend, featuring **TLS certificate upload** for secure email testing.
+
+## Features
+
+✨ **Email Management**
+
+- Receive and display emails via SMTP server
+- View email content (HTML, plain text, raw)
+- Delete individual emails or clear all
+- Real-time email updates with auto-refresh
+- Email statistics and analytics
+
+🔒 **TLS Certificate Support**
+
+- **Upload TLS certificates** via web interface
+- **Automatic SMTP TLS/STARTTLS configuration**
+- Certificate validation and info display
+- Real-time certificate status monitoring
+- Secure email connections support
+
+🚀 **Modern Tech Stack**
+
+- React frontend with TypeScript and Tailwind CSS
+- NestJS backend with Swagger API documentation
+- Docker support (single/multi-container deployments)
+- Real-time UI updates and modern UX
+
+🔧 **SMTP Server Features**
+
+- Configurable port and authentication
+- Automatic network interface detection
+- Connection info display and copy-to-clipboard
+- Configuration examples for popular email clients
+- TLS/STARTTLS support when certificates are uploaded
 
 ## Screenshot
 
@@ -11,6 +44,64 @@ _Main interface showing the email list and management features_
 ![Fake SMTP Server UI - Email Details](screenshot-2.png)
 
 _Detailed view of received emails with content inspection_
+
+## TLS Certificate Upload
+
+The server now supports **TLS certificate upload** for secure email connections:
+
+### Features
+
+- **Web-based certificate upload** - Upload `.crt`, `.pem` certificate and `.key` private key files
+- **Automatic SMTP configuration** - Server automatically configures TLS/STARTTLS when certificates are available
+- **Certificate validation** - Validates certificate format and key compatibility
+- **Real-time status** - View certificate details, validity dates, and status
+- **Certificate management** - Delete certificates and refresh status
+
+### Usage
+
+1. **Navigate to Settings** - Go to the "Server Settings" tab in the web interface
+2. **Upload Certificate** - Scroll to "TLS Certificate Upload" section
+3. **Select Files** - Choose your certificate file (.crt/.pem) and private key file (.key/.pem)
+4. **Upload** - Click "Upload Certificate" to enable TLS
+5. **Verify Status** - Check "Current Certificate Status" for details
+
+### Supported Formats
+
+- **Certificate files**: `.crt`, `.pem`, `.cert`
+- **Private key files**: `.key`, `.pem`
+- **Certificate types**: X.509 certificates (self-signed or CA-issued)
+
+### SMTP Configuration with TLS
+
+Once a certificate is uploaded, the SMTP server will support:
+
+- **STARTTLS** - Opportunistic TLS encryption
+- **Port 2525** - Non-secure initially, upgrades to TLS via STARTTLS
+- **Connection security** - Clients can use `requireTLS: true` in configurations
+
+Example nodemailer configuration with TLS:
+
+```javascript
+{
+  host: 'localhost',
+  port: 2525,
+  secure: false,        // Use STARTTLS instead of implicit TLS
+  requireTLS: true,     // Require TLS upgrade via STARTTLS
+  auth: {
+    user: 'testuser',   // If authentication is enabled
+    pass: 'testpass'
+  }
+}
+```
+
+### API Endpoints
+
+The TLS functionality adds these new API endpoints:
+
+- `GET /api/tls/info` - Get current certificate information
+- `POST /api/tls/upload` - Upload certificate and key files
+- `DELETE /api/tls/certificate` - Delete current certificate
+- `GET /api/smtp/connection-info` - Get SMTP info (now includes TLS status)
 
 ## Docker Setup
 
@@ -342,6 +433,146 @@ docker-compose down -v
 - You prefer microservices architecture
 - You want to build from source locally
 - You need to customize the build process
+
+## Configuration
+
+### Environment Variables
+
+The server can be configured using the following environment variables:
+
+**SMTP Configuration:**
+
+- `SMTP_PORT` - SMTP server port (default: 2525)
+- `SMTP_HOST` - SMTP server hostname (auto-detected if not set)
+- `SMTP_FAKE_USER` - Username for SMTP authentication (optional)
+- `SMTP_FAKE_PASS` - Password for SMTP authentication (optional)
+
+**Example with authentication:**
+
+```bash
+# Docker run with authentication
+docker run -d \
+  --name fake-smtp-server \
+  -p 80:80 -p 2525:2525 \
+  -e SMTP_FAKE_USER=testuser \
+  -e SMTP_FAKE_PASS=testpass \
+  phamtanminhtien/fake-smtp-server:latest
+
+# Docker compose environment
+services:
+  fake-smtp:
+    image: phamtanminhtien/fake-smtp-server:latest
+    environment:
+      SMTP_PORT: 2525
+      SMTP_FAKE_USER: testuser
+      SMTP_FAKE_PASS: testpass
+    ports:
+      - "80:80"
+      - "2525:2525"
+```
+
+### Data Persistence
+
+**Email Data:**
+
+- Stored in `/data/emails` directory
+- Persisted across container restarts
+- Can be mounted as volume for persistence
+
+**TLS Certificates:**
+
+- Stored in `/data/certificates` directory
+- Automatically loaded on server startup
+- Includes certificate metadata and validation info
+- Persisted across container restarts
+
+**Volume mounting example:**
+
+```bash
+# Persistent data storage
+docker run -d \
+  --name fake-smtp-server \
+  -p 80:80 -p 2525:2525 \
+  -v /host/data:/data \
+  phamtanminhtien/fake-smtp-server:latest
+```
+
+### TLS Certificate Management
+
+**Storage Location:**
+
+- Certificates: `/data/certificates/cert.pem`
+- Private keys: `/data/certificates/key.pem`
+- Metadata: `/data/certificates/metadata.json`
+
+**Certificate Requirements:**
+
+- Must be valid X.509 certificates
+- Private key must match the certificate
+- Supports both self-signed and CA-issued certificates
+- PEM format required
+
+**Security Notes:**
+
+- Certificates are validated on upload
+- Private keys are stored securely on the filesystem
+- TLS context is tested before activation
+- Invalid certificates are rejected with detailed error messages
+
+### Local Development
+
+**Prerequisites:**
+
+- Node.js 18+
+- npm or yarn
+- Git
+
+**Setup:**
+
+```bash
+# Clone repository
+git clone <repository-url>
+cd fake-smtp-server
+
+# Install dependencies
+npm install
+
+# Install backend dependencies
+cd packages/backend
+npm install
+
+# Install frontend dependencies
+cd ../frontend
+npm install
+
+# Return to root
+cd ../..
+```
+
+**Development commands:**
+
+```bash
+# Start backend development server
+cd packages/backend
+npm run start:dev
+
+# Start frontend development server (in new terminal)
+cd packages/frontend
+npm run dev
+
+# Build for production
+npm run build
+```
+
+**Environment setup for development:**
+Create `.env` file in `packages/backend/`:
+
+```env
+SMTP_PORT=2525
+SMTP_HOST=localhost
+SMTP_FAKE_USER=testuser
+SMTP_FAKE_PASS=testpass
+```
 
 ## License
 
