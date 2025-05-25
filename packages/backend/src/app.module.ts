@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmailModule } from './email/email.module';
 import { SmtpModule } from './smtp/smtp.module';
+import { TlsModule } from './tls/tls.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { SmtpModule } from './smtp/smtp.module';
     }),
     EmailModule,
     SmtpModule,
+    TlsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

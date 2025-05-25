@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SafeEmailRenderer } from "@/components/SafeEmailRenderer";
+import { TLSCertificateUpload } from "@/components/TLSCertificateUpload";
 import { useEmails } from "@/hooks/useEmails";
 import { useSMTPInfo } from "@/hooks/useSMTPInfo";
 import { Separator } from "@radix-ui/react-separator";
@@ -611,17 +612,17 @@ function App() {
                       <div className="flex items-center justify-between p-4 border rounded-lg">
                         <div className="flex-1">
                           <span className="text-sm font-medium">
-                            Secure Connection
+                            TLS Support
                           </span>
                           <div className="mt-1">
                             <Badge
                               variant={
-                                connectionInfo?.secure ? "default" : "secondary"
+                                connectionInfo?.tls ? "default" : "secondary"
                               }
                             >
-                              {connectionInfo?.secure
-                                ? "TLS/SSL Enabled"
-                                : "Not Encrypted"}
+                              {connectionInfo?.tls
+                                ? "TLS Available (STARTTLS)"
+                                : "No TLS Certificate"}
                             </Badge>
                           </div>
                         </div>
@@ -725,6 +726,11 @@ function App() {
   host: '${connectionInfo.host}',
   port: ${connectionInfo.port},
   secure: ${connectionInfo.secure}${
+    connectionInfo.tls
+      ? `,
+  requireTLS: true`
+      : ""
+  }${
     connectionInfo.requiresAuth && connectionInfo.auth
       ? `,
   auth: {
@@ -744,6 +750,11 @@ function App() {
   host: '${connectionInfo.host}',
   port: ${connectionInfo.port},
   secure: ${connectionInfo.secure}${
+    connectionInfo.tls
+      ? `,
+  requireTLS: true`
+      : ""
+  }${
     connectionInfo.requiresAuth && connectionInfo.auth
       ? `,
   auth: {
@@ -802,6 +813,18 @@ function App() {
                       </Button>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card className="mt-6">
+                <CardHeader>
+                  <CardTitle>TLS Certificate Upload</CardTitle>
+                  <CardDescription>
+                    Upload a new TLS certificate for the SMTP server
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <TLSCertificateUpload />
                 </CardContent>
               </Card>
             </div>

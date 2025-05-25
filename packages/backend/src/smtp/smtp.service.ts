@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { SMTPServer, SMTPServerOptions } from 'smtp-server';
 import { simpleParser, ParsedMail } from 'mailparser';
 import { EmailService } from '../email/email.service';
+import { TlsService } from '../tls/tls.service';
 import { Readable } from 'stream';
 import * as os from 'os';
 
@@ -22,6 +23,7 @@ export class SmtpService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
+    private readonly tlsService: TlsService,
   ) {
     this.smtpPort = parseInt(
       this.configService.get<string>('SMTP_PORT', '2525'),
@@ -30,10 +32,15 @@ export class SmtpService implements OnModuleInit, OnModuleDestroy {
     this.fakeUsername = this.configService.get<string>('SMTP_FAKE_USER');
     this.fakePassword = this.configService.get<string>('SMTP_FAKE_PASS');
 
+    this.initializeServer();
+  }
+
+  private initializeServer() {
     const hasAuth = !!(this.fakeUsername && this.fakePassword);
+    const tlsCert = this.tlsService.getCertificateFiles();
 
     const options: SMTPServerOptions = {
-      secure: false,
+      secure: false, // We'll use STARTTLS instead of implicit TLS
       authOptional: true,
       disabledCommands: hasAuth ? [] : ['AUTH'],
       onAuth: hasAuth
@@ -41,6 +48,19 @@ export class SmtpService implements OnModuleInit, OnModuleDestroy {
         : undefined,
       onData: this.handleEmailData.bind(this) as SMTPServerOptions['onData'],
     };
+
+    // Add TLS support if certificate is available
+    if (tlsCert) {
+      options.secure = false; // Start with non-secure, allow STARTTLS
+      options.key = tlsCert.key;
+      options.cert = tlsCert.cert;
+      this.logger.log('SMTP Server configured with TLS certificate');
+    } else {
+      this.logger.log(
+        'SMTP Server running without TLS (certificate not available)',
+      );
+    }
+
     this.server = new SMTPServer(options);
 
     if (hasAuth) {
@@ -48,6 +68,25 @@ export class SmtpService implements OnModuleInit, OnModuleDestroy {
     } else {
       this.logger.log(`SMTP Authentication disabled`);
     }
+  }
+
+  // Restart the server with new TLS configuration
+  async restartWithTLS(): Promise<void> {
+    this.logger.log('Restarting SMTP server with new TLS configuration...');
+
+    // Stop current server
+    await new Promise<void>((resolve) => {
+      this.server.close(() => {
+        this.logger.log('SMTP Server stopped for TLS reconfiguration');
+        resolve();
+      });
+    });
+
+    // Reinitialize with new TLS settings
+    this.initializeServer();
+
+    // Start server again
+    this.startServer();
   }
 
   private handleAuth(
@@ -76,11 +115,13 @@ export class SmtpService implements OnModuleInit, OnModuleDestroy {
     const hostname =
       this.configService.get<string>('SMTP_HOST') || this.getHostname();
     const hasAuth = !!(this.fakeUsername && this.fakePassword);
+    const hasTLS = !!this.tlsService.getCertificateFiles();
 
     return {
       port: this.smtpPort,
       host: hostname,
-      secure: false,
+      secure: false, // Always false as we use STARTTLS
+      tls: hasTLS,
       requiresAuth: hasAuth,
       auth: hasAuth
         ? {
